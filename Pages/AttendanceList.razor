@@ -1,0 +1,16 @@
+@page "/attendance-list"
+@using EventEase.Models
+@inject EventService EventService
+
+<h3>Attendance List</h3>
+
+@foreach (var eventItem in EventService.Events)
+{
+    <h4>@eventItem.Name</h4>
+    <ul>
+        @foreach (Attendee attendee in eventItem.Attendees)
+        {
+            <li>@attendee.Name (@attendee.Id)</li>
+        }
+    </ul>
+}

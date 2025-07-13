@@ -1,0 +1,49 @@
+@page "/event-registration"
+@using EventEase.Models
+@using Microsoft.AspNetCore.Components.Forms
+@inject EventService EventService
+@inject EventEase.Services.SessionService SessionService
+
+<h3>Event Registration</h3>
+
+<EditForm Model="newEvent" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label for="name" class="form-label">Event Name</label>
+        <InputText id="name" class="form-control" @bind-Value="newEvent.Name" />
+        <ValidationMessage For="() => newEvent.Name" />
+    </div>
+
+    <div class="mb-3">
+        <label for="date" class="form-label">Event Date</label>
+        <InputDate id="date" class="form-control" @bind-Value="newEvent.Date" />
+        <ValidationMessage For="() => newEvent.Date" />
+    </div>
+
+    <div class="mb-3">
+        <label for="location" class="form-label">Event Location</label>
+        <InputText id="location" class="form-control" @bind-Value="newEvent.Location" />
+        <ValidationMessage For="() => newEvent.Location" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Register Event</button>
+</EditForm>
+
+@code {
+    private EventModel newEvent = new EventModel { Date = null }; // Initialize Date to null
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            EventService.AddEvent(newEvent);
+            await SessionService.AddEventToSessionAsync("CurrentUser", newEvent); // Add event to session
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving event to session: {ex.Message}");
+        }
+    }
+}

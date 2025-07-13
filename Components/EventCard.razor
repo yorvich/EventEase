@@ -1,0 +1,27 @@
+@using EventEase.Models
+@inject EventService EventService
+
+<div class="event-card">
+    @if (EventDetails != null)
+    {
+        <h3>@EventDetails.Name</h3>
+        <p>Date: @(EventDetails?.Date?.ToString("MMMM dd, yyyy") ?? "N/A")</p>
+        // Handle nullable DateTime
+        <p>Location: @(EventDetails?.Location ?? "N/A")</p>
+        // Handle nullable Location
+        <button @onclick="() => OnRegister.InvokeAsync(EventDetails)">Register</button>
+    }
+    else
+    {
+        <p>No event details available.</p>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public EventModel? EventDetails { get; set; } // Renamed to avoid ambiguity
+
+    [Parameter]
+    public EventCallback<EventModel> OnRegister { get; set; }
+}
+    

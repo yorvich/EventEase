@@ -1,0 +1,55 @@
+@page "/event-list"
+
+@using EventEase.Models
+@using System.Collections.ObjectModel
+
+@inject EventEase.Services.SessionService SessionService
+
+<h3>Event List</h3>
+
+@if (events == null || !events.Any())
+{
+    <p>No events available.</p>
+}
+else
+{
+    <ul class="list-group">
+        @foreach (var eventItem in events)
+        {
+            <li class="list-group-item" @key="eventItem.Id">
+                <h5>@(eventItem?.Name ?? string.Empty)</h5>
+                <p>Date: @(eventItem?.Date.HasValue == true ? eventItem.Date.Value.ToString("MMMM dd, yyyy") : string.Empty)</p>
+                <p>Location: @(eventItem?.Location ?? string.Empty)</p>
+                <button class="btn btn-primary" @onclick="() => RegisterForEvent(eventItem)">Register</button>
+            </li>
+        }
+    </ul>
+}
+
+@code {
+    [Inject]
+    private EventService? EventService { get; set; }
+
+    private ObservableCollection<EventModel>? events;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var mockEvents = EventService?.GetAllEvents() ?? new List<EventModel>();
+        var userEvents = await SessionService.GetUserEventsAsync("CurrentUser");
+
+        events = new ObservableCollection<EventModel>(mockEvents.Concat(userEvents));
+        events.CollectionChanged += (sender, args) => StateHasChanged(); // Refresh UI on changes
+    }
+
+    private async Task RegisterForEvent(EventModel? eventItem)
+    {
+        if (eventItem == null || eventItem.Attendees.Any(a => a.Name == "CurrentUser"))
+        {
+            return;
+        }
+
+        eventItem.Attendees.Add(new Attendee { Id = Guid.NewGuid(), Name = "CurrentUser" });
+        await SessionService.AddEventToSessionAsync("CurrentUser", eventItem);
+        StateHasChanged();
+    }
+}
