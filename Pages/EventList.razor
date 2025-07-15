@@ -37,7 +37,14 @@ else
         var mockEvents = EventService?.GetAllEvents() ?? new List<EventModel>();
         var userEvents = await SessionService.GetUserEventsAsync("CurrentUser");
 
-        events = new ObservableCollection<EventModel>(mockEvents.Concat(userEvents));
+        // Combine mockEvents and userEvents, ensuring no duplicates based on Id
+        var uniqueEvents = mockEvents
+        .Concat(userEvents)
+        .GroupBy(e => e.Id)
+        .Select(g => g.First())
+        .ToList();
+
+        events = new ObservableCollection<EventModel>(uniqueEvents);
         events.CollectionChanged += (sender, args) => StateHasChanged(); // Refresh UI on changes
     }
 

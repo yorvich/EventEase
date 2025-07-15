@@ -21,11 +21,18 @@ namespace EventEase.Services
             {
                 var userEvents = await _localStorage.GetItemAsync<List<EventModel>>(userId) ?? new List<EventModel>();
 
-                // Assign a unique GUID to the new event
-                eventModel.Id = Guid.NewGuid();
+                // Check if the event already exists in the session
+                if (!userEvents.Any(e => e.Id == eventModel.Id))
+                {
+                    // Assign a unique GUID only if the event doesn't already have an Id
+                    if (eventModel.Id == Guid.Empty)
+                    {
+                        eventModel.Id = Guid.NewGuid();
+                    }
 
-                userEvents.Add(eventModel);
-                await _localStorage.SetItemAsync(userId, userEvents);
+                    userEvents.Add(eventModel);
+                    await _localStorage.SetItemAsync(userId, userEvents);
+                }
             }
             catch (Exception ex)
             {

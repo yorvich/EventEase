@@ -40,6 +40,9 @@
         {
             EventService.AddEvent(newEvent);
             await SessionService.AddEventToSessionAsync("CurrentUser", newEvent); // Add event to session
+
+            // Reset the newEvent object to avoid duplicate entries
+            newEvent = new EventModel { Date = null };
         }
         catch (Exception ex)
         {
